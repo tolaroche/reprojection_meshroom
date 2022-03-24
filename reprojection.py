@@ -1,4 +1,3 @@
-from calendar import c
 import cv2
 import numpy as np
 import sys
@@ -6,8 +5,6 @@ import glob
 import os
 import json
 import openmesh
-import cv2
-import matplotlib.pyplot as plt
 
 """This is the numpy dtype that I will use to store the cameras intrinsic parameters describe is the .sfm file."""
 intrinsicParamType = np.dtype({'names':['id', 'K', 'distCoef'],
@@ -15,10 +12,12 @@ intrinsicParamType = np.dtype({'names':['id', 'K', 'distCoef'],
 
 })
 
+
 """This is the numpy dtype that I will use to store the cameras parameters (for a particular image) describe is the .sfm file."""
-sfmCameraPoseType = np.dtype({'names':['idV', 'idP', 'path', 'name', 'R', 't', 'intrinsic'],
-               'formats': [np.int_, np.int_, 'U150', 'U30', (np.float_, (3,3)), (np.float_, 3), intrinsicParamType]
+sfmCameraPoseType = np.dtype({'names':['idV', 'idP', 'path', 'name', 'R', 't', 'known', 'intrinsic'],
+               'formats': [np.int_, np.int_, 'U150', 'U30', (np.float_, (3,3)), (np.float_, 3), np.bool_, intrinsicParamType]
 })
+
 
 def readSfmFile(path):
     """
@@ -171,6 +170,40 @@ def projectPointsCloud(points, cameraPose):
 
 
 
+def pointsCloudPlot(im, pc, color, radius = 0, alpha = 0.5):
+    """
+        This function take an image, a points cloud and plot 
+        this points cloud on the image. The points are plot 
+        with a specific color, size and with alpha blending 
+    
+        Parameters
+        ----------
+        im : numpy array of shape (n, m, 3), the image
+        pc : numpy array of shape (n, 2), the points cloud
+        color : numpy array of shape(3,), the color of the plotted points
+        radius : int, the size of the points plotted
+        alpha : float, the alpha blending value
+
+        Return
+        ------
+        imf : numpy array of shape (n, m, 3), the image with the points plotted
+
+
+    """
+
+
+    imp = np.copy(im)
+
+    for p in pc:
+        if p[0]<im.shape[1] and p[0]>0 and p[1]<im.shape[0] and p[1]>0:
+            imp = cv2.circle(imp, center = (int(p[0]), int(p[1])), radius = radius, color = color, thickness = -1)
+        
+    imf = alpha*im + (1-alpha)*imp
+
+    return imf
+
+
+
 
 if __name__ == "__main__":
 
@@ -187,23 +220,22 @@ if __name__ == "__main__":
 
     mesh = openmesh.read_trimesh(pathMesh)
 
-    print(mesh.points().shape)
-
     color = np.array([255,255,0])
 
     for i, cp in enumerate(cameraPoses):
 
         print(i)
 
-        Pd, _ = projectPointsCloud(mesh.points(), cp)
-
         im = cv2.imread(cp['path'])
+        imf = np.copy(im)
 
-        for p in Pd:
-            if p[0]<im.shape[1] and p[0]>0 and p[1]<im.shape[0] and p[1]>0:
-                im[int(p[1]), int(p[0])] = color
+        if cp['known']:
+
+            Pd, _ = projectPointsCloud(mesh.points(), cp)
+
+            imf = pointsCloudPlot(imf, Pd, color = color, radius = 2, alpha = 0.5)
         
-        # cv2.imwrite(pathSave + cp['name'], im)
+        cv2.imwrite(pathSave + cp['name'], imf)
 
 
 

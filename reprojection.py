@@ -208,10 +208,10 @@ def pointsCloudPlot(im, pc, color, radius = 0, alpha = 0.5):
 if __name__ == "__main__":
 
     # Path of the .sfm file
-    pathSfm = 'sfm.sfm'
+    pathSfm = './sfm.sfm'
     
     #Path of the mesh to reproject (must be in the right coordinate system)
-    pathMesh = 'mesh.obj'
+    pathMesh = './mesh.obj'
 
     # Path to the folder where we want to save the images with the reprojection
     pathSave = './'

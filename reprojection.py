@@ -208,13 +208,13 @@ def pointsCloudPlot(im, pc, color, radius = 0, alpha = 0.5):
 if __name__ == "__main__":
 
     # Path of the .sfm file
-    pathSfm = '/home/laroche/Desktop/reprojection/sfm2.sfm'
+    pathSfm = 'sfm.sfm'
     
     #Path of the mesh to reproject (must be in the right coordinate system)
-    pathMesh = '/home/laroche/Desktop/reprojection/icp_both/duct_scan_pc2.obj'
+    pathMesh = 'mesh.obj'
 
     # Path to the folder where we want to save the images with the reprojection
-    pathSave = '/home/laroche/Desktop/reprojection/icp_both/reprojection_scan/'
+    pathSave = './'
 
     cameraPoses = readSfmFile(pathSfm)
 
